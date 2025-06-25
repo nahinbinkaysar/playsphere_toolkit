@@ -72,7 +72,7 @@ export function StartProcess({ onClose, name, email, licenseKey, phone, cususern
 			draggable
 			onDragStart={e => e.dataTransfer.setData("text/plain", state)}
 			style={{ cursor: "grab", userSelect: "none", padding: "4px", border: "1px dashed #aaa" }} >
-			<input readonly type="text" label='full name' value={state} />
+			<input readOnly type="text" label='full name' value={state} />
 
 		</span>
 	}
@@ -155,8 +155,11 @@ export function StartProcess({ onClose, name, email, licenseKey, phone, cususern
 
 		<h1> 2 </h1>
 
-		<p>username {" "} <Draggy state={cususername} /></p>
-		<p>password {" "} <Draggy state={cuspassword} /></p>
+		<TextField label='username' value={cususernameState} onChange={e => setCusUsername(e.target.value)} />
+		<TextField label='password' value={cuspasswordState} onChange={e => setCusPassword(e.target.value)} />
+
+		<p>username {" "}<Draggy state={cususernameState} /></p>
+		<p>password {" "}<Draggy state={cuspasswordState} /></p>
 
 		<h1> 3 </h1>
 		<a href="https://store.steampowered.com/account/redeemwalletcode">redeem</a>

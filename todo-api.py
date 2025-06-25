@@ -68,6 +68,8 @@ class Address(AddressBase):
     province = Column(String, nullable=False)
     zip = Column(String, nullable=False)
     used = Column(Boolean, default=False)
+    used_at = Column(DateTime, nullable=True)  # Track when address was used
+    used_by = Column(String, nullable=True)    # Track who used the address
 
 Base.metadata.create_all(bind=engine)
 CustomerBase.metadata.create_all(bind=customer_engine)
@@ -264,12 +266,16 @@ def get_next_address(db: Session = Depends(get_address_db)):
     if not address:
         raise HTTPException(status_code=404, detail="No unused addresses left")
     address.used = True
+    address.used_at = datetime.utcnow()
+    # Optionally, set used_by from the current user if available
     db.commit()
     return {
         "street": address.street,
         "city": address.city,
         "province": address.province,
-        "zip": address.zip
+        "zip": address.zip,
+        "used_at": address.used_at,
+        "used_by": address.used_by
     }
 
 @app.put("/customer/{customer_id}")
