@@ -1,6 +1,8 @@
 import { Button, TextField } from "@mui/material";
 import { useEffect, useState } from "react";
+import { useRef } from "react";
 import toast from "react-hot-toast";
+import ContentCopyIcon from '@mui/icons-material/ContentCopy'; // MUI icon (optional)
 
 
 
@@ -23,6 +25,11 @@ export function StartProcess({ onClose, name, email, licenseKey, phone, cususern
 	const [zip, setZip] = useState("");
 
 	const [bkashMessage, setBkashMessage] = useState("");
+	
+	
+	const [verification, setVerification] = useState("tmr mail ekta verification link gese, ekta blue box paba, oitay touch and hold kore copy korba, oita amake dao, oi link e tmi dhuiko na");
+	const [done, setDone] = useState("");
+
 
 	// Update state if props change (for edit mode)
 	useEffect(() => { if (fb) setFB(fb); }, [fb]);
@@ -77,6 +84,22 @@ export function StartProcess({ onClose, name, email, licenseKey, phone, cususern
 		</span>
 	}
 
+
+	function CopyableParagraph({ text }) {
+		const handleCopy = () => {
+			navigator.clipboard.writeText(text);
+			toast.success("Copied!");
+		};
+
+		return (
+			<div style={{ display: "flex", alignItems: "center" }}>
+				<p style={{ marginRight: 8 }}>{text}</p>
+				<Button onClick={handleCopy} size="small" variant="outlined">
+					<ContentCopyIcon fontSize="small" />
+				</Button>
+			</div>
+		);
+	}
 	async function fetchAddress() {
 		try {
 			const res = await fetch("http://localhost:8000/address/next");
@@ -111,8 +134,14 @@ export function StartProcess({ onClose, name, email, licenseKey, phone, cususern
 			setLastName(rest);
 
 			setCusPassword(first.toLowerCase() + "_$ph3r3");
+
 		}
 	}, [name]);
+
+	useEffect(() => {
+		let doneee = "done \nid: " + cususernameState + " \npass: " + cuspasswordState;
+		setDone(doneee);
+	}, [cususernameState, cuspasswordState]);
 
 	function extractBkashData(message) {
 		// Regex for: amount, phone, trx, date
@@ -151,7 +180,11 @@ export function StartProcess({ onClose, name, email, licenseKey, phone, cususern
 
 		<p> email {" "} <Draggy state={email} /></p>
 
+		<CopyableParagraph text={verification} />
+
 		<p> -- wait for verification -- </p>
+
+		<p></p>
 
 		<h1> 2 </h1>
 
@@ -190,6 +223,9 @@ export function StartProcess({ onClose, name, email, licenseKey, phone, cususern
 
 		<h1> 6 </h1>
 		<TextField label='bKash message' multiline maxRows={4} value={bkashMessage} onChange={handleBkashMessageChange} />
+
+		<CopyableParagraph text={done} />
+
 
 		<div style={{ fontSize: '40px', textAlign: 'center' }}>Login</div>
 		<Button onClick={addCustomer} variant="contained" color="primary">{customerId ? "Update Customer" : "Add Customer"}</Button>
