@@ -1,10 +1,7 @@
 import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { Button, TextField } from "@mui/material";
-import Box from '@mui/material/Box'
-// import { CreateTodoModal } from "./CreateTodoModal";
 import toast from "react-hot-toast";
-import { PrintCustomer } from "./PrintCustomer";
 import { StartProcess } from "./StartProcess";
 
 export function Dashboard() {
@@ -62,8 +59,8 @@ export function Dashboard() {
 
 				{!showStartProcess && (
 					<>
-						<div style={{ display: "flex column", backgroundColor: "white", padding: "20px" }}>
-							<div style={{ display: "flex", flexDirection: "column", backgroundColor: "white", padding: "20px" }}>
+						<div>
+							<div style={{ display: "flex", flexDirection: "column" }}>
 								<h1>new</h1>
 								<TextField variant="filled" label='full name' required value={name} onChange={(e) => setName(e.target.value)} />
 								<TextField variant="filled" label='email' required value={email} onChange={(e) => setEmail(e.target.value)} />

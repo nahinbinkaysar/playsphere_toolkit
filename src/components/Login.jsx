@@ -24,7 +24,7 @@ function Login() {
 		});
 		const j = await r.json();
 
-		if(j["access_token"]) {
+		if (j["access_token"]) {
 			localStorage.setItem("username", username);
 			toast.success("Logged in");
 			navigate("/dashboard");
@@ -36,24 +36,26 @@ function Login() {
 
 	}
 	return <>
-		<div style={{display:'flex', justifyContent:'center', alignItems:'center',
-		height:'100vh'}}>
+		<div style={{
+			display: 'flex', justifyContent: 'center', alignItems: 'center',
+			height: '100vh'
+		}}>
 			<div>
-				<div style={{fontSize:'40px', textAlign:'center'}}>Login</div>
-				<br/>
-				<br/>
+				<div style={{ fontSize: '40px', textAlign: 'center' }}>Login</div>
+				<br />
+				<br />
 				<div>
-					<TextField placeholder="Username" value={username} onChange={(e) => setUsername(e.target.value)}/>
-					<br/>
-					<br/>
-					<TextField type="password" placeholder="Password" value={pass} onChange={(e) => setPass(e.target.value)}/>
+					<TextField placeholder="Username" value={username} onChange={(e) => setUsername(e.target.value)} />
+					<br />
+					<br />
+					<TextField type="password" placeholder="Password" value={pass} onChange={(e) => setPass(e.target.value)} />
 				</div>
-				<br/>
-				<br/>
+				<br />
+				<br />
 				<center>
 					<Button onClick={loginClick} variant="outlined" size="large">Login</Button>
 				</center>
-				
+
 			</div>
 		</div>
 	</>
