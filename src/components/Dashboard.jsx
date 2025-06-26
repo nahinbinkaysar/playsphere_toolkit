@@ -3,41 +3,79 @@ import { useNavigate } from "react-router-dom"
 import { Button, TextField } from "@mui/material";
 import toast from "react-hot-toast";
 import { StartProcess } from "./StartProcess";
+import { CustomerTable } from "./CustomerTable";
 
 export function Dashboard() {
 	const navigate = useNavigate();
 	const username = localStorage.getItem("username");
 
 	const [customerList, setCustomerList] = useState([]);
-	const [search, setSearch] = useState("");
-
+	const [newCustomerId, setNewCustomerId] = useState(null);
+	const [newCustomerData, setNewCustomerData] = useState(null);
 	const [showStartProcess, setShowStartProcess] = useState(false);
 	const [editCustomer, setEditCustomer] = useState(null);
-
-	const [fb, setFB] = useState("");
 	const [email, setEmail] = useState("");
 	const [licenseKey, setLicenseKey] = useState("");
 	const [name, setName] = useState("");
-	const [phone, setPhone] = useState("");
-	const [cususername, setCusUsername] = useState("");
-	const [cuspassword, setCusPassword] = useState("");
-	const [payment, setPayment] = useState("");
-	const [trx, setTrx] = useState("");
-	const [date, setDate] = useState("");
 
-	async function getCustomers() {
-		const r = await fetch("http://localhost:8000/customers");
-		const j = await r.json();
-		setCustomerList(j);
-		console.log(j);
+	async function fetchCustomers() {
+		try {
+			const r = await fetch("http://localhost:8000/customers");
+			const j = await r.json();
+			setCustomerList(j);
+		} catch (err) {
+			console.error("Failed to fetch customers", err);
+		}
 	}
 
 	useEffect(() => {
 		if (!username) {
 			navigate("/login");
+		} else {
+			fetchCustomers();
 		}
-		getCustomers();
 	}, [])
+
+	// Fetch the new customer data by id when newCustomerId changes
+	useEffect(() => {
+		if (newCustomerId) {
+			fetch(`http://localhost:8000/customer/${newCustomerId}`)
+				.then(res => {
+					if (!res.ok) throw new Error("Customer not found");
+					return res.json();
+				})
+				.then(data => setNewCustomerData(data))
+				.catch(err => toast.error(err.message));
+		}
+	}, [newCustomerId]);
+
+	async function addCustomer() {
+		const body = { email, license_key: licenseKey, name };
+		try {
+			const r = await fetch("http://localhost:8000/customer", {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify(body)
+			});
+			const j = await r.json();
+			if (!r.ok) throw new Error(j.detail || "Failed to add customer");
+			toast.success("customer added");
+			fetchCustomers();
+			setEmail("");
+			setLicenseKey("");
+			setName("");
+			setNewCustomerId(j.id); // store the new id
+
+			// Fetch the full customer object by id and store it
+			const customerRes = await fetch(`http://localhost:8000/customer/${j.id}`);
+			const customerObj = await customerRes.json();
+			setNewCustomerData(customerObj);
+
+			setShowStartProcess(true);
+		} catch (err) {
+			toast.error(err.message);
+		}
+	}
 
 	function logoutClick() {
 		localStorage.removeItem('username');
@@ -45,29 +83,23 @@ export function Dashboard() {
 		navigate("/login");
 	}
 
-	
-
 	return <>
-		<div style={{ display: "flex", alignItems: "center", justifyContent: "center", width: "100%" }} >
+		<div style={{ display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center"}}>
 			<div style={{ width: "500px" }}>
-				<div style={{ display: 'flex', justifyContent: 'space-between' }}>
-					<h1>Welcome, {username}!</h1>
-					<div>
-						<Button onClick={logoutClick} variant="outlined" color="error">Logout</Button>
-					</div>
+				<div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+					<h2>Welcome, {username}!</h2>
+					<Button onClick={logoutClick} variant="outlined" color="error">Logout</Button>
 				</div>
 
 				{!showStartProcess && (
 					<>
-						<div>
-							<div style={{ display: "flex", flexDirection: "column" }}>
-								<h1>new</h1>
-								<TextField variant="filled" label='full name' required value={name} onChange={(e) => setName(e.target.value)} />
-								<TextField variant="filled" label='email' required value={email} onChange={(e) => setEmail(e.target.value)} />
-								<TextField variant="filled" label='key' required value={licenseKey} onChange={(e) => setLicenseKey(e.target.value)} />
+						<div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+							<h3>create new customer</h3>
+							<TextField label='full name' value={name} onChange={(e) => setName(e.target.value)} />
+							<TextField label='email' value={email} onChange={(e) => setEmail(e.target.value)} />
+							<TextField label='key' value={licenseKey} onChange={(e) => setLicenseKey(e.target.value)} />
 
-								<Button onClick={() => setShowStartProcess(true)} fullWidth variant="contained" size="large" >Start</Button>
-							</div>
+							<Button onClick={addCustomer} variant="contained" size="large" >Start</Button>
 						</div>
 					</>
 				)}
@@ -76,71 +108,20 @@ export function Dashboard() {
 					onClose={() => {
 						setShowStartProcess(false);
 						setEditCustomer(null);
-						getCustomers(); // Refresh list after closing modal
+						setNewCustomerId(null);
+						setNewCustomerData(null);
+						fetchCustomers();
 					}}
-					name={editCustomer ? editCustomer.name : name}
-					email={editCustomer ? editCustomer.email : email}
-					licenseKey={editCustomer ? editCustomer.license_key : licenseKey}
-					phone={editCustomer ? editCustomer.phone : phone}
-					cususername={editCustomer ? editCustomer.username : cususername}
-					cuspassword={editCustomer ? editCustomer.password : cuspassword}
-					payment={editCustomer ? editCustomer.payment : payment}
-					trx={editCustomer ? editCustomer.transaction_id : trx}
-					date={editCustomer ? editCustomer.date : date}
-					fb={editCustomer ? editCustomer.facebook_id : fb}
-					customerId={editCustomer ? editCustomer.id : undefined}
+					customerId={editCustomer ? editCustomer.id : newCustomerId}
+					customerData={editCustomer ? editCustomer : newCustomerData}
 				/>}
 
-				<div style={{ padding: "10px" }}>
-					<TextField fullWidth placeholder="Search" value={search} onChange={(e) => setSearch(e.target.value)} />
-				</div>
-				<div>
-					<table style={{ width: "100%", borderCollapse: "collapse", marginTop: "10px" }}>
-						<thead>
-							<tr>
-								<th style={{ border: "1px solid #ccc", padding: "6px" }}>Name</th>
-								<th style={{ border: "1px solid #ccc", padding: "6px" }}>Number</th>
-								<th style={{ border: "1px solid #ccc", padding: "6px" }}>Username</th>
-								<th style={{ border: "1px solid #ccc", padding: "6px" }}>Password</th>
-								<th style={{ border: "1px solid #ccc", padding: "6px" }}>Payment</th>
-								<th style={{ border: "1px solid #ccc", padding: "6px" }}>TrxID</th>
-								<th style={{ border: "1px solid #ccc", padding: "6px" }}>Date</th>
-								<th style={{ border: "1px solid #ccc", padding: "6px" }}>Paid on</th>
-								<th style={{ border: "1px solid #ccc", padding: "6px" }}>Edit</th>
-							</tr>
-						</thead>
-						<tbody>
-							{
-								customerList.map((value, index) => {
-									if (value.name && value.name.toLowerCase().includes(search.toLowerCase())) {
-										return (
-											<tr key={index} style={{ background: value.payment ? '#b6fcb6' : undefined }}>
-												<td>{value.name}</td>
-												<td>{value.phone}</td>
-												<td>{value.username}</td>
-												<td>{value.password}</td>
-												<td>{value.payment}</td>
-												<td>{value.transaction_id}</td>
-												<td>{value.date}</td>
-												<td>{value.paid_on || ''}</td>
-												<td>
-													<Button size="small" variant="outlined" onClick={() => setEditCustomer(value)}>Edit</Button>
-												</td>
-											</tr>
-										);
-									}
-									return null;
-								})
-							}
-						</tbody>
-					</table>
-				</div>
-
-				<br />
-				<br />
-				{/* <CreateTodoModal updateTodos={getTodos}/> */}
-
+			</div>
+			{/* CustomerTable in a scrollable container for responsiveness */}
+			<div style={{ overflowX: "auto", maxWidth: "100vw" }}>
+				<CustomerTable customerList={customerList} fetchCustomers={fetchCustomers} setEditCustomer={setEditCustomer} />
 			</div>
 		</div>
+
 	</>
 }

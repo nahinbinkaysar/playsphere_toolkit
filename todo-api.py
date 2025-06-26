@@ -49,13 +49,13 @@ class User(Base):
 class Customer(CustomerBase):
     __tablename__ = "customers"
     id = Column(Integer, primary_key=True, index=True)
-    facebook_id = Column(String, nullable=False)
-    email = Column(String, nullable=False)
-    license_key = Column(String, nullable=False)
-    name = Column(String, nullable=False)
-    phone = Column(String, nullable=False)
-    username = Column(String, nullable=False)
-    password = Column(String, nullable=False)
+    facebook_id = Column(String, nullable=True)  # changed to nullable=True
+    email = Column(String, nullable=True)        # changed to nullable=True
+    license_key = Column(String, nullable=True)  # changed to nullable=True
+    name = Column(String, nullable=True)         # changed to nullable=True
+    phone = Column(String, nullable=True)        # changed to nullable=True
+    username = Column(String, nullable=True)     # changed to nullable=True
+    password = Column(String, nullable=True)     # changed to nullable=True
     payment = Column(String, nullable=True)
     transaction_id = Column(String, nullable=True)
     date = Column(String, nullable=True)
@@ -95,9 +95,9 @@ class UserUpdate(BaseModel):
     profile_picture: Optional[str]
 
 class CustomerCreate(BaseModel):
-    facebook_id: str
-    email: str
-    license_key: str
+    facebook_id: Optional[str] = None
+    email: Optional[str] = None
+    license_key: Optional[str] = None
     name: Optional[str] = None
     phone: Optional[str] = None
     username: Optional[str] = None
@@ -174,24 +174,6 @@ def login(user: UserLogin, db: Session = Depends(get_db)):
     token = create_jwt_token(db_user.username)
     return {"access_token": token, "token_type": "bearer"}
 
-@app.get("/customer/{username}")
-def get_customer(username: str, db: Session = Depends(get_customer_db)):
-    db_customer = db.query(Customer).filter(Customer.username == username).first()
-    if not db_customer:
-        raise HTTPException(status_code=404, detail="Customer not found")
-    return {
-        "facebook_id": db_customer.facebook_id,
-        "email": db_customer.email,
-        "license_key": db_customer.license_key,
-        "name": db_customer.name,
-        "phone": db_customer.phone,
-        "username": db_customer.username,
-        "password": db_customer.password,
-        "payment": db_customer.payment,
-        "transaction_id": db_customer.transaction_id,
-        "date": db_customer.date,
-    }
-
 @app.post("/customer")
 def create_customer(customer: CustomerCreate, db: Session = Depends(get_customer_db)):
     # If username is provided, check for uniqueness
@@ -203,7 +185,8 @@ def create_customer(customer: CustomerCreate, db: Session = Depends(get_customer
     db.add(db_customer)
     db.commit()
     db.refresh(db_customer)
-    return {"message": "Customer entry created successfully"}
+    # Return only the new customer id
+    return {"id": db_customer.id}
 
 @app.get("/message")
 def message():
@@ -260,22 +243,18 @@ def get_all_customers(db: Session = Depends(get_customer_db)):
         for c in customers
     ]
 
-@app.get("/address/next")
-def get_next_address(db: Session = Depends(get_address_db)):
-    address = db.query(Address).filter(Address.used == False).first()
-    if not address:
-        raise HTTPException(status_code=404, detail="No unused addresses left")
-    address.used = True
-    address.used_at = datetime.utcnow()
-    # Optionally, set used_by from the current user if available
-    db.commit()
+@app.get("/address/by-index/{index}")
+def get_address_by_index(index: int, db: Session = Depends(get_address_db)):
+    addresses = db.query(Address).order_by(Address.id).all()
+    if not addresses or index < 0 or index >= len(addresses):
+        raise HTTPException(status_code=404, detail="Address index out of range")
+    address = addresses[index]
     return {
+        "id": address.id,
         "street": address.street,
         "city": address.city,
         "province": address.province,
-        "zip": address.zip,
-        "used_at": address.used_at,
-        "used_by": address.used_by
+        "zip": address.zip
     }
 
 @app.put("/customer/{customer_id}")
@@ -289,3 +268,31 @@ def update_customer(customer_id: int, customer: CustomerUpdate, db: Session = De
     db.commit()
     db.refresh(db_customer)
     return {"message": "Customer updated successfully"}
+
+@app.get("/customer/{customer_id}")
+def get_customer_by_id(customer_id: int, db: Session = Depends(get_customer_db)):
+    db_customer = db.query(Customer).filter(Customer.id == customer_id).first()
+    if not db_customer:
+        raise HTTPException(status_code=404, detail="Customer not found")
+    return {
+        "id": db_customer.id,
+        "facebook_id": db_customer.facebook_id,
+        "email": db_customer.email,
+        "license_key": db_customer.license_key,
+        "name": db_customer.name,
+        "phone": db_customer.phone,
+        "username": db_customer.username,
+        "password": db_customer.password,
+        "payment": db_customer.payment,
+        "transaction_id": db_customer.transaction_id,
+        "date": db_customer.date,
+    }
+
+@app.delete("/customer/{customer_id}")
+def delete_customer(customer_id: int, db: Session = Depends(get_customer_db)):
+    db_customer = db.query(Customer).filter(Customer.id == customer_id).first()
+    if not db_customer:
+        raise HTTPException(status_code=404, detail="Customer not found")
+    db.delete(db_customer)
+    db.commit()
+    return {"message": "Customer deleted successfully"}

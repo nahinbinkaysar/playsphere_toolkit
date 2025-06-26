@@ -1,40 +1,66 @@
-import { Button, TextField } from "@mui/material";
+import { Button, TextField, IconButton } from "@mui/material";
 import { useEffect, useState, useRef } from "react";
 import toast from "react-hot-toast";
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 
-export function StartProcess({ onClose, name, email, licenseKey, phone, cususername, cuspassword, payment, trx, date, fb, customerId }) {
-	// State
-	const [fbState, setFB] = useState(fb || "");
-	const [phoneState, setPhone] = useState(phone || "");
-	const [cususernameState, setCusUsername] = useState(cususername || "");
-	const [cuspasswordState, setCusPassword] = useState(cuspassword || "");
-	const [paymentState, setPayment] = useState(payment || "");
-	const [trxState, setTrx] = useState(trx || "");
-	const [dateState, setDate] = useState(date || "");
+
+export function StartProcess({ onClose, customerId }) {
+
+	const [facebook_id, setFacebookId] = useState("");
+	const [email, setEmail] = useState("");
+	const [license_key, setLicenseKey] = useState("");
+	const [name, setName] = useState("");
+	const [phone, setPhone] = useState("");
+	const [cusUsername, setCusUsername] = useState("");
+	const [cusPassword, setCusPassword] = useState("");
+	const [payment, setPayment] = useState("");
+	const [transaction_id, setTransactionID] = useState("");
+	const [date, setDate] = useState("");
+
 	const [firstName, setFirstName] = useState("");
 	const [lastName, setLastName] = useState("");
 	const [street, setStreet] = useState("");
 	const [city, setCity] = useState("");
 	const [province, setProvince] = useState("");
 	const [zip, setZip] = useState("");
+
+
 	const [bkashMessage, setBkashMessage] = useState("");
 	const [verification] = useState("tmr mail ekta verification link gese, ekta blue box paba, oitay touch and hold kore copy korba, oita amake dao, oi link e tmi dhuiko na");
-	const [done, setDone] = useState("");
+	
+	const [bKashNahin] = useState("01715149756 ei number e 375tk Bkash e send money koro, reference e( name ) must dio\nif possible please provide cash-out charge");
+	const [bKashRadid] = useState("01727831601 ei number e 375tk Bkash e send money koro, reference e( name ) must dio\nif possible please provide cash-out charge");
+	const [bKashSheshir] = useState("01727831601 ei number e 375tk Bkash e send money koro, reference e( name ) must dio\nif possible please provide cash-out charge");
+	
+	const [csb] = useState("https://www.facebook.com/share/p/191rFy4BeG/ \nCsb post e done likhe diyo, track rakhte subidha hbe");
 
-	// Update state if props change (for edit mode)
-	useEffect(() => { if (fb) setFB(fb); }, [fb]);
-	useEffect(() => { if (phone) setPhone(phone); }, [phone]);
-	useEffect(() => { if (cususername) setCusUsername(cususername); }, [cususername]);
-	useEffect(() => { if (cuspassword) setCusPassword(cuspassword); }, [cuspassword]);
-	useEffect(() => { if (payment) setPayment(payment); }, [payment]);
-	useEffect(() => { if (trx) setTrx(trx); }, [trx]);
-	useEffect(() => { if (date) setDate(date); }, [date]);
+
+	const [done, setDone] = useState("");
+	const [numAddresses, setNumAddresses] = useState(0);
 
 	useEffect(() => {
-		let doneee = `done\nid: ${cususernameState}\npass: ${cuspasswordState}`;
-		setDone(doneee);
-	}, [cususernameState, cuspasswordState]);
+		console.log(customerId);
+		if (customerId) {
+			fetch(`http://localhost:8000/customer/${customerId}`)
+				.then(res => {
+					if (!res.ok) throw new Error("Customer not found");
+					return res.json();
+				})
+				.then(data => {
+					setFacebookId(data.facebook_id || "");
+					setEmail(data.email || "");
+					setLicenseKey(data.license_key || "");
+					setName(data.name || "");
+					setPhone(data.phone || "");
+					setCusUsername(data.username || "");
+					setCusPassword(data.password || "");
+					setPayment(data.payment || "");
+					setTransactionID(data.transaction_id || "");
+					setDate(data.date || "");
+				})
+				.catch(err => toast.error(err.message));
+		}
+	}, [customerId]);
 
 	useEffect(() => {
 		if (name) {
@@ -45,53 +71,96 @@ export function StartProcess({ onClose, name, email, licenseKey, phone, cususern
 			setFirstName(first);
 			const rest = parts.slice(1).join(" ").replace(/[^A-Za-z\s]/g, "");
 			setLastName(rest);
-			setCusPassword(first.toLowerCase() + "_$ph3r3");
+			setCusPassword(first.toLowerCase() + "Sph3r3");
 		}
 	}, [name]);
 
-	async function addCustomer() {
+	useEffect(() => {
+		setDone(`done\nid: ${cusUsername}\npass: ${cusPassword}`);
+	}, [cusUsername, cusPassword]);
+
+	useEffect(() => {
+		async function fetchNumAddresses() {
+			try {
+				const res = await fetch("http://localhost:8000/customers"); // dummy fetch to get address count
+				const addrRes = await fetch("http://localhost:8000/address/by-index/0");
+				if (addrRes.status === 404) {
+					setNumAddresses(0);
+					return;
+				}
+				// Try to find the number of addresses by incrementing index until 404
+				let count = 0;
+				while (true) {
+					const res = await fetch(`http://localhost:8000/address/by-index/${count}`);
+					if (!res.ok) break;
+					count++;
+				}
+				setNumAddresses(count);
+			} catch (err) {
+				setNumAddresses(0);
+			}
+		}
+		fetchNumAddresses();
+	}, []);
+
+	useEffect(() => {
+		async function fetchAddressForCustomer() {
+			if (customerId && numAddresses > 0) {
+				const index = (customerId - 1) % numAddresses;
+				try {
+					const res = await fetch(`http://localhost:8000/address/by-index/${index}`);
+					if (!res.ok) throw new Error("Address not found");
+					const data = await res.json();
+					setStreet(data.street);
+					setCity(data.city);
+					setProvince(data.province);
+					setZip(data.zip);
+				} catch (err) {
+					setStreet(""); setCity(""); setProvince(""); setZip("");
+				}
+			}
+		}
+		fetchAddressForCustomer();
+	}, [customerId, numAddresses]);
+
+	async function updateCustomer() {
 		const body = {
-			facebook_id: fbState,
+			facebook_id,
 			email,
-			license_key: licenseKey,
+			license_key,
 			name,
-			phone: phoneState,
-			username: cususernameState,
-			password: cuspasswordState,
-			payment: paymentState,
-			transaction_id: trxState,
-			date: dateState
+			phone,
+			username: cusUsername,
+			password: cusPassword,
+			payment,
+			transaction_id,
+			date,
 		};
 		let r, j;
-		if (customerId) {
-			r = await fetch(`http://localhost:8000/customer/${customerId}`, {
-				method: "PUT",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify(body)
-			});
-			j = await r.json();
-			toast.success("customer updated");
-		} else {
-			r = await fetch("http://localhost:8000/customer", {
-				method: "POST",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify(body)
-			});
-			j = await r.json();
-			toast.success("customer added");
-		}
+		r = await fetch(`http://localhost:8000/customer/${customerId}`, {
+			method: "PUT",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify(body)
+		});
+		j = await r.json();
+		toast.success("customer updated");
+
 		onClose();
 	}
 
-	function Draggy({ state }) {
+	function Draggy({ state, setState, label }) {
 		return (
-			<span
-				draggable
-				onDragStart={e => e.dataTransfer.setData("text/plain", state)}
-				style={{ cursor: "grab", userSelect: "none", padding: "4px", border: "1px dashed #aaa" }}
-			>
-				<input readOnly type="text" value={state} />
-			</span>
+
+			<div style={{ display: "flex", alignItems: "center" }}>
+				<TextField
+					draggable
+					onDragStart={e => e.dataTransfer.setData("text/plain", state)} label={label}
+					value={state}
+					style={{ cursor: "grab", userSelect: "none", padding: "4px" }}
+					onChange={(e) => setState(e.target.value)} />
+				<CopyableParagraph text={state} />
+			</div>
+
 		);
 	}
 
@@ -101,30 +170,12 @@ export function StartProcess({ onClose, name, email, licenseKey, phone, cususern
 			toast.success("Copied!");
 		};
 		return (
-			<div style={{ display: "flex", alignItems: "center" }}>
-				<p style={{ marginRight: 8 }}>{text}</p>
-				<Button onClick={handleCopy} size="small" variant="outlined">
-					<ContentCopyIcon fontSize="small" />
-				</Button>
-			</div>
+			<IconButton onClick={handleCopy} aria-label="copy" size="small">
+				<ContentCopyIcon fontSize="inherit" />
+			</IconButton>
+
 		);
 	}
-
-	async function fetchAddress() {
-		try {
-			const res = await fetch("http://localhost:8000/address/next");
-			if (!res.ok) throw new Error("No unused addresses left or server error");
-			const data = await res.json();
-			setStreet(data.street);
-			setCity(data.city);
-			setProvince(data.province);
-			setZip(data.zip);
-		} catch (err) {
-			toast.error(err.message);
-		}
-	}
-
-	useEffect(() => { fetchAddress(); }, []);
 
 	function extractBkashData(message) {
 		const regex = /received Tk ([\d.]+) from (\d+).*?TrxID (\w+) at ([\d\/ :]+)/i;
@@ -146,47 +197,106 @@ export function StartProcess({ onClose, name, email, licenseKey, phone, cususern
 		const { payment, phone, trx, date } = extractBkashData(msg);
 		if (payment) setPayment(payment);
 		if (phone) setPhone(phone);
-		if (trx) setTrx(trx);
+		if (trx) setTransactionID(trx); // fix: setTransactionID, not setTrx
 		if (date) setDate(date);
 	}
 
 	return (
 		<>
-			<TextField slotProps={{ input: { readOnly: true } }} label='full name' value={name} />
-			<TextField slotProps={{ input: { readOnly: true } }} label='email' value={email} />
-			<TextField slotProps={{ input: { readOnly: true } }} label='key' value={licenseKey} />
+			<div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+				<h1> init </h1>
+				<TextField label='full name' value={name} onChange={(e) => setName(e.target.value)} />
+				<TextField label='email' value={email} onChange={(e) => setEmail(e.target.value)} />
+				<TextField label='key' value={license_key} onChange={(e) => setLicenseKey(e.target.value)} />
 
-			<h1> 1 </h1>
-			<a href="https://store.steampowered.com/join/?">create steam acc</a>
-			<p> email <Draggy state={email} /></p>
-			<CopyableParagraph text={verification} />
-			<p> -- wait for verification -- </p>
-			<p></p>
+				<h1> 1 </h1>
+				<p><a href="https://store.steampowered.com/join/?">create steam acc</a></p>
+				<Draggy state={email} setState={setEmail} label={"email"} />
+				<p> -- wait for verification -- </p>
 
-			<h1> 2 </h1>
-			<TextField label='username' value={cususernameState} onChange={e => setCusUsername(e.target.value)} />
-			<TextField label='password' value={cuspasswordState} onChange={e => setCusPassword(e.target.value)} />
-			<p>username <Draggy state={cususernameState} /></p>
-			<p>password <Draggy state={cuspasswordState} /></p>
+				<p>{verification}
+				<CopyableParagraph text={verification} /> </p>
 
-			<h1> 3 </h1>
-			<a href="https://store.steampowered.com/account/redeemwalletcode">redeem</a>
-			<p> key <Draggy state={licenseKey} /></p>
 
-			<h1> 4 </h1>
-			<p> Street <Draggy state={street} /> city <Draggy state={city} /> province <Draggy state={province} /> zip <Draggy state={zip} /> </p>
 
-			<h1> 5 </h1>
-			<a href="https://store.steampowered.com/app/2669320/EA_SPORTS_FC_25/">fc 25</a>
-			<p>first name <Draggy state={firstName} /> last name <Draggy state={lastName} /></p>
-			<p> Street <Draggy state={street} /> city <Draggy state={city} /> province <Draggy state={province} /> zip <Draggy state={zip} /> </p>
+				<h1> 2 </h1>
+				<Draggy state={cusUsername} setState={setCusUsername} label={"username"} />
+				<Draggy state={cusPassword} setState={setCusPassword} label={"password"} />
 
-			<h1> 6 </h1>
-			<TextField label='bKash message' multiline maxRows={4} value={bkashMessage} onChange={handleBkashMessageChange} />
-			<CopyableParagraph text={done} />
+				<h1> 3 </h1>
+				<p><a href="https://store.steampowered.com/account/redeemwalletcode">redeem</a></p>
+				<Draggy state={license_key} setState={setLicenseKey} label={"license_key"} />
 
-			<div style={{ fontSize: '40px', textAlign: 'center' }}>Login</div>
-			<Button onClick={addCustomer} variant="contained" color="primary">{customerId ? "Update Customer" : "Add Customer"}</Button>
+
+				<h1> 4 </h1>
+
+				<Draggy state={street} setState={setStreet} label={"street"} />
+				<Draggy state={city} setState={setCity} label={"city"} />
+				<Draggy state={province} setState={setProvince} label={"province"} />
+				<Draggy state={zip} setState={setZip} label={"zip"} />
+
+				<h1> 5 </h1>
+				<p><a href="https://store.steampowered.com/app/2669320/EA_SPORTS_FC_25/">fc 25</a></p>
+
+				<Draggy state={firstName} setState={setFirstName} label={"firstName"} />
+				<Draggy state={lastName} setState={setLastName} label={"lastName"} />
+
+				<Draggy state={street} setState={setStreet} label={"Billing address"} />
+				<Draggy state={city} setState={setCity} label={"city"} />
+				<Draggy state={province} setState={setProvince} label={"province"} />
+				<Draggy state={zip} setState={setZip} label={"zip"} />
+
+
+				<h1> 6 </h1>
+
+				<p>{bKashNahin}
+				<CopyableParagraph text={bKashNahin} /> </p>
+
+				<p>{bKashRadid}
+				<CopyableParagraph text={bKashRadid} /> </p>
+
+				<p>{bKashSheshir}
+				<CopyableParagraph text={bKashSheshir} /> </p>
+
+				
+
+				<TextField label='bKash message' multiline maxRows={4} value={bkashMessage} onChange={handleBkashMessageChange} />
+				{/* <Draggy state={bkashMessage} setState={setBkashMessage} label={"bkashMessage"} /> */}
+
+
+				<p>{done}
+				<CopyableParagraph text={done} /> </p>
+
+				
+				<p>{csb}
+				<CopyableParagraph text={csb} /> </p>
+
+
+
+				<Button onClick={updateCustomer} variant="contained" color="primary">{customerId ? "Update Customer" : "Add Customer"}</Button>
+				{customerId && (
+					<Button
+						variant="outlined"
+						color="error"
+						onClick={async () => {
+							if (window.confirm(`Delete customer ${name || email || customerId}?`)) {
+								try {
+									const res = await fetch(`http://localhost:8000/customer/${customerId}`, { method: 'DELETE' });
+									if (!res.ok) throw new Error('Failed to delete');
+									toast.success('Customer deleted');
+									onClose();
+								} catch (err) {
+									toast.error(err.message);
+								}
+							}
+						}}
+						style={{ marginTop: 8 }}
+					>
+						Delete Customer
+					</Button>
+				)}
+			</div >
+
 		</>
 	);
 }
