@@ -5,6 +5,8 @@ import toast from "react-hot-toast";
 import { StartProcess } from "./StartProcess";
 import { CustomerTable } from "./CustomerTable";
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
 export function Dashboard() {
 	const navigate = useNavigate();
 	const username = localStorage.getItem("username");
@@ -20,7 +22,7 @@ export function Dashboard() {
 
 	async function fetchCustomers() {
 		try {
-			const r = await fetch("http://localhost:8000/customers");
+			const r = await fetch(`${API_BASE_URL}/customers`);
 			const j = await r.json();
 			setCustomerList(j);
 		} catch (err) {
@@ -39,7 +41,7 @@ export function Dashboard() {
 	// Fetch the new customer data by id when newCustomerId changes
 	useEffect(() => {
 		if (newCustomerId) {
-			fetch(`http://localhost:8000/customer/${newCustomerId}`)
+			fetch(`${API_BASE_URL}/customer/${newCustomerId}`)
 				.then(res => {
 					if (!res.ok) throw new Error("Customer not found");
 					return res.json();
@@ -52,7 +54,7 @@ export function Dashboard() {
 	async function addCustomer() {
 		const body = { email, license_key: licenseKey, name };
 		try {
-			const r = await fetch("http://localhost:8000/customer", {
+			const r = await fetch(`${API_BASE_URL}/customer`, {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify(body)
@@ -67,7 +69,7 @@ export function Dashboard() {
 			setNewCustomerId(j.id); // store the new id
 
 			// Fetch the full customer object by id and store it
-			const customerRes = await fetch(`http://localhost:8000/customer/${j.id}`);
+			const customerRes = await fetch(`${API_BASE_URL}/customer/${j.id}`);
 			const customerObj = await customerRes.json();
 			setNewCustomerData(customerObj);
 
@@ -85,7 +87,7 @@ export function Dashboard() {
 
 	return <>
 		<div style={{ display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center"}}>
-			<div style={{ width: "500px" }}>
+			<div style={{  }}>
 				<div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
 					<h2>Welcome, {username}!</h2>
 					<Button onClick={logoutClick} variant="outlined" color="error">Logout</Button>
@@ -118,7 +120,7 @@ export function Dashboard() {
 
 			</div>
 			{/* CustomerTable in a scrollable container for responsiveness */}
-			<div style={{ overflowX: "auto", maxWidth: "100vw" }}>
+			<div style={{ overflowX: "auto", maxWidth: "100vw", marginLeft: "30px", marginRight: "30px"}}>
 				<CustomerTable customerList={customerList} fetchCustomers={fetchCustomers} setEditCustomer={setEditCustomer} />
 			</div>
 		</div>

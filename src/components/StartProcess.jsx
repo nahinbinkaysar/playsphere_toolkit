@@ -3,6 +3,8 @@ import { useEffect, useState, useRef } from "react";
 import toast from "react-hot-toast";
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
 
 export function StartProcess({ onClose, customerId }) {
 
@@ -41,7 +43,7 @@ export function StartProcess({ onClose, customerId }) {
 	useEffect(() => {
 		console.log(customerId);
 		if (customerId) {
-			fetch(`http://localhost:8000/customer/${customerId}`)
+			fetch(`${API_BASE_URL}/customer/${customerId}`)
 				.then(res => {
 					if (!res.ok) throw new Error("Customer not found");
 					return res.json();
@@ -65,13 +67,14 @@ export function StartProcess({ onClose, customerId }) {
 	useEffect(() => {
 		if (name) {
 			const generatedUsername = name.replace(/\s+/g, "_").replace(/[^A-Za-z_]/g, "").toLowerCase();
-			setCusUsername(generatedUsername);
+			// console.log(cusUsername);
+			if(cusUsername == "") setCusUsername(generatedUsername);
 			const parts = name.trim().split(/\s+/);
 			const first = (parts[0] || "").replace(/[^A-Za-z]/g, "");
-			setFirstName(first);
+			if(firstName == "") setFirstName(first);
 			const rest = parts.slice(1).join(" ").replace(/[^A-Za-z\s]/g, "");
-			setLastName(rest);
-			setCusPassword(first.toLowerCase() + "Sph3r3");
+			if(lastName == "") setLastName(rest);
+			if(cusPassword == "") setCusPassword(first.toLowerCase() + "Sph3r3");
 		}
 	}, [name]);
 
@@ -82,8 +85,8 @@ export function StartProcess({ onClose, customerId }) {
 	useEffect(() => {
 		async function fetchNumAddresses() {
 			try {
-				const res = await fetch("http://localhost:8000/customers"); // dummy fetch to get address count
-				const addrRes = await fetch("http://localhost:8000/address/by-index/0");
+				const res = await fetch(`${API_BASE_URL}/customers`); // dummy fetch to get address count
+				const addrRes = await fetch(`${API_BASE_URL}/address/by-index/0`);
 				if (addrRes.status === 404) {
 					setNumAddresses(0);
 					return;
@@ -91,7 +94,7 @@ export function StartProcess({ onClose, customerId }) {
 				// Try to find the number of addresses by incrementing index until 404
 				let count = 0;
 				while (true) {
-					const res = await fetch(`http://localhost:8000/address/by-index/${count}`);
+					const res = await fetch(`${API_BASE_URL}/address/by-index/${count}`);
 					if (!res.ok) break;
 					count++;
 				}
@@ -108,7 +111,7 @@ export function StartProcess({ onClose, customerId }) {
 			if (customerId && numAddresses > 0) {
 				const index = (customerId - 1) % numAddresses;
 				try {
-					const res = await fetch(`http://localhost:8000/address/by-index/${index}`);
+					const res = await fetch(`${API_BASE_URL}/address/by-index/${index}`);
 					if (!res.ok) throw new Error("Address not found");
 					const data = await res.json();
 					setStreet(data.street);
@@ -137,7 +140,7 @@ export function StartProcess({ onClose, customerId }) {
 			date,
 		};
 		let r, j;
-		r = await fetch(`http://localhost:8000/customer/${customerId}`, {
+		r = await fetch(`${API_BASE_URL}/customer/${customerId}`, {
 			method: "PUT",
 			headers: { "Content-Type": "application/json" },
 			body: JSON.stringify(body)
@@ -281,7 +284,7 @@ export function StartProcess({ onClose, customerId }) {
 						onClick={async () => {
 							if (window.confirm(`Delete customer ${name || email || customerId}?`)) {
 								try {
-									const res = await fetch(`http://localhost:8000/customer/${customerId}`, { method: 'DELETE' });
+									const res = await fetch(`${API_BASE_URL}/customer/${customerId}`, { method: 'DELETE' });
 									if (!res.ok) throw new Error('Failed to delete');
 									toast.success('Customer deleted');
 									onClose();

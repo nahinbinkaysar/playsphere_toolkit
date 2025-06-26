@@ -4,6 +4,8 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
 function Login() {
 	const navigate = useNavigate();
 	const [username, setUsername] = useState("");
@@ -14,7 +16,7 @@ function Login() {
 			"username": username,
 			"password": pass
 		}
-		const r = await fetch("http://localhost:8000/login", {
+		const r = await fetch(`${API_BASE_URL}/login`, {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json"

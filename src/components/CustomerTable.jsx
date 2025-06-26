@@ -2,19 +2,18 @@ import { useState, useEffect } from "react"
 import { Button, TextField } from "@mui/material";
 import toast from "react-hot-toast";
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
 export function CustomerTable({ customerList, fetchCustomers, setEditCustomer }) {
 	const [search, setSearch] = useState("");
 
 	return (
-		<div style={{ display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", width: "100%" }}>
-			<div style={{ width: "500px" }}>
-				{/* StartProcess is now only rendered in Dashboard, not here */}
-			</div>
+		<div style={{ display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", width: "100%"}}>
 			<div style={{ padding: "10px" }}>
 				<TextField fullWidth placeholder="Search" value={search} onChange={(e) => setSearch(e.target.value)} />
 			</div>
 			<div style={{ overflowX: "auto", width: "100%", maxWidth: "100vw" }}>
-				<table style={{ width: "100%", minWidth: 800, borderCollapse: "collapse", marginTop: "10px" }}>
+				<table style={{ width: "100%", minWidth: 800, borderCollapse: "collapse", margin: "16px" }}>
 					<thead>
 						<tr>
 							<th style={{ border: "1px solid #ccc", padding: "6px" }}>Name</th>
@@ -47,7 +46,7 @@ export function CustomerTable({ customerList, fetchCustomers, setEditCustomer })
 								<td>
 									<Button size="small" color="error" variant="outlined" onClick={async () => {
 										try {
-											const res = await fetch(`http://localhost:8000/customer/${value.id}`, { method: 'DELETE' });
+											const res = await fetch(`${API_BASE_URL}/customer/${value.id}`, { method: 'DELETE' });
 											if (!res.ok) throw new Error('Failed to delete');
 											toast.success('Customer deleted');
 											fetchCustomers();
