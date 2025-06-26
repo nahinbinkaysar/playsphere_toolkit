@@ -83,6 +83,10 @@ export function StartProcess({ onClose, customerId }) {
 	}, [cusUsername, cusPassword]);
 
 	useEffect(() => {
+		document.title = name ? name : "Start Process";
+	}, [name]);
+
+	useEffect(() => {
 		async function fetchNumAddresses() {
 			try {
 				const res = await fetch(`${API_BASE_URL}/customers`); // dummy fetch to get address count
