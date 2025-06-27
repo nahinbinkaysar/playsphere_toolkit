@@ -1,0 +1,11 @@
+# Node.js
+node_modules/
+.env
+
+# SQLite DBs (uncomment if you do NOT want to commit them)
+# todo.db
+# customer.db
+# address.db
+
+# Logs
+*.log
