@@ -54,8 +54,8 @@ export function StartProcess({ onClose, customerId }) {
 					setLicenseKey(data.license_key || "");
 					setName(data.name || "");
 					setPhone(data.phone || "");
-					setCusUsername(data.username || "");
-					setCusPassword(data.password || "");
+					if (data.username) setCusUsername(data.username);
+					if (data.password) setCusPassword(data.password);
 					setPayment(data.payment || "");
 					setTransactionID(data.transaction_id || "");
 					setDate(data.date || "");
