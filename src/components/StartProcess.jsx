@@ -231,6 +231,9 @@ export function StartProcess({ onClose, customerId }) {
 				<Draggy state={cusPassword} setState={setCusPassword} label={"password"} />
 
 				<h1> 3 </h1>
+				<p>{bKashRadid}
+				<CopyableParagraph text={bKashRadid} /> </p>
+				
 				<p><a href="https://store.steampowered.com/account/redeemwalletcode">redeem</a></p>
 				<Draggy state={license_key} setState={setLicenseKey} label={"license_key"} />
 

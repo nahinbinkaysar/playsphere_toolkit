@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { Button, TextField, IconButton } from "@mui/material";
 import toast from "react-hot-toast";
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
@@ -37,7 +37,10 @@ export function CustomerTable({ customerList, fetchCustomers, setEditCustomer })
 						{customerList.filter(value => value.name && value.name.toLowerCase().includes(search.toLowerCase())).map((value, index) => (
 							<tr key={index} style={{ background: value.payment ? '#b6fcb6' : undefined }}>
 								<td>
-									<IconButton size="small" aria-label="edit" onClick={() => setEditCustomer(value)}>
+									<IconButton size="small" aria-label="edit" onClick={() => {
+										setEditCustomer(value);
+										window.scrollTo({ top: 0, behavior: "smooth" });
+									}}>
 										<EditIcon fontSize="inherit" />
 									</IconButton>
 								</td>
