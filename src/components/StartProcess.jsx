@@ -34,7 +34,7 @@ export function StartProcess({ onClose, customerId }) {
 	const [bKashRadid] = useState("01727831601 ei number e 285tk Bkash e send money koro, reference e( name ) must dio\nif possible please provide cash-out charge");
 	const [bKashSheshir] = useState("000");
 	
-	const [csb] = useState("https://www.facebook.com/share/p/191rFy4BeG/ \nCsb post e done likhe diyo, track rakhte subidha hbe");
+	const [csb] = useState("https://www.facebook.com/playsphereofficial/ \npage e ekta follow diyo and CSB post e ekta comment koiro");
 
 
 	const [done, setDone] = useState("");
@@ -243,7 +243,7 @@ export function StartProcess({ onClose, customerId }) {
 				<Draggy state={zip} setState={setZip} label={"zip"} />
 
 				<h1> 5 </h1>
-				<p><a href="https://store.steampowered.com/app/2669320/EA_SPORTS_FC_25/">fc 25</a></p>
+				<p><a href="https://store.steampowered.com/app/3405690/EA_SPORTS_FC_26/">fc 26</a></p>
 
 				<Draggy state={firstName} setState={setFirstName} label={"firstName"} />
 				<Draggy state={lastName} setState={setLastName} label={"lastName"} />
