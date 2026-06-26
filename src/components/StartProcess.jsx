@@ -3,7 +3,7 @@ import { useEffect, useState, useRef } from "react";
 import toast from "react-hot-toast";
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "/api";
 
 
 export function StartProcess({ onClose, customerId }) {
