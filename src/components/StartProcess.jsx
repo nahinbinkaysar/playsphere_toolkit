@@ -30,9 +30,9 @@ export function StartProcess({ onClose, customerId }) {
 	const [bkashMessage, setBkashMessage] = useState("");
 	const [verification] = useState("tmr mail ekta verification link gese, ekta blue box paba, oitay touch and hold kore copy korba, oita amake dao, oi link e tmi dhuiko na");
 	
-	const [bKashNahin] = useState("01715149756 ei number e 375tk Bkash e send money koro, reference e( name ) must dio\nif possible please provide cash-out charge");
-	const [bKashRadid] = useState("01727831601 ei number e 375tk Bkash e send money koro, reference e( name ) must dio\nif possible please provide cash-out charge");
-	const [bKashSheshir] = useState("01727831601 ei number e 375tk Bkash e send money koro, reference e( name ) must dio\nif possible please provide cash-out charge");
+	const [bKashNahin] = useState("01715149756 ei number e 285tk Bkash e send money koro, reference e( name ) must dio\nif possible please provide cash-out charge");
+	const [bKashRadid] = useState("01727831601 ei number e 285tk Bkash e send money koro, reference e( name ) must dio\nif possible please provide cash-out charge");
+	const [bKashSheshir] = useState("000");
 	
 	const [csb] = useState("https://www.facebook.com/share/p/191rFy4BeG/ \nCsb post e done likhe diyo, track rakhte subidha hbe");
 
