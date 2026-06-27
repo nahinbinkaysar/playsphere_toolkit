@@ -5,6 +5,47 @@ import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "/api";
 
+const USERNAME_ADJECTIVES = [
+	"acute", "adept", "agile", "alert", "alive", "amber", "ample", "angry", "aware", "awful",
+	"azure", "basic", "black", "bland", "bleak", "blind", "blond", "brave", "brief", "brisk",
+	"broad", "brown", "bumpy", "chill", "civic", "civil", "clean", "clear", "close", "comic",
+	"crisp", "curly", "daily", "dense", "dizzy", "droll", "dusty", "eager", "early", "elder",
+	"elite", "equal", "exact", "faint", "false", "fancy", "fiery", "final", "first", "fixed",
+	"flaky", "fleet", "focal", "foggy", "frail", "fresh", "front", "funny", "furry", "fuzzy",
+	"giant", "gloss", "grand", "great", "green", "happy", "hardy", "harsh", "hazel", "heavy",
+	"human", "ideal", "inner", "itchy", "jolly", "juicy", "known", "lanky", "large", "leafy",
+	"legal", "level", "light", "local", "loose", "loyal", "lucky", "lunar", "magic", "major",
+	"matte", "meaty", "merry", "minor", "misty", "moral", "muddy", "naive", "nasty", "nifty",
+];
+
+const USERNAME_NOUNS = [
+	"apple", "arrow", "atlas", "beach", "beard", "berry", "blade", "block", "bloom", "board",
+	"brain", "bread", "brick", "brook", "brush", "cabin", "cable", "camel", "candy", "cedar",
+	"chair", "chart", "chess", "cloud", "coral", "crown", "delta", "dream", "eagle", "earth",
+	"ember", "field", "flame", "flora", "forge", "frame", "fruit", "giant", "globe", "grape",
+	"grass", "grove", "guard", "haven", "heart", "honey", "house", "ivory", "jewel", "judge",
+	"knife", "laser", "lemon", "light", "lotus", "maple", "metal", "mirth", "model", "money",
+	"month", "music", "oasis", "ocean", "olive", "orbit", "paint", "paper", "pearl", "piano",
+	"pilot", "plant", "queen", "river", "robot", "route", "salad", "scale", "scene", "scope",
+	"shade", "shell", "shift", "shore", "smile", "sound", "spark", "spice", "stone", "storm",
+	"sugar", "table", "tiger", "tower", "trail", "unity", "vapor", "water", "whale", "world",
+];
+
+const DEFAULT_CUSTOMER_PASSWORD = "pl@ySph3r3";
+
+function getRandomItem(items) {
+	return items[Math.floor(Math.random() * items.length)];
+}
+
+function generateCustomerUsername() {
+	const adjective = getRandomItem(USERNAME_ADJECTIVES);
+	const noun = getRandomItem(USERNAME_NOUNS);
+	const capitalizedNoun = noun.charAt(0).toUpperCase() + noun.slice(1);
+	const digits = String(Math.floor(Math.random() * 1000)).padStart(3, "0");
+
+	return `${adjective}${capitalizedNoun}${digits}`;
+}
+
 
 export function StartProcess({ onClose, customerId }) {
 
@@ -66,15 +107,13 @@ export function StartProcess({ onClose, customerId }) {
 
 	useEffect(() => {
 		if (name) {
-			const generatedUsername = name.replace(/\s+/g, "_").replace(/[^A-Za-z_]/g, "").toLowerCase();
-			// console.log(cusUsername);
-			if(cusUsername == "") setCusUsername(generatedUsername);
+			if(cusUsername == "") setCusUsername(generateCustomerUsername());
 			const parts = name.trim().split(/\s+/);
 			const first = (parts[0] || "").replace(/[^A-Za-z]/g, "");
 			if(firstName == "") setFirstName(first);
 			const rest = parts.slice(1).join(" ").replace(/[^A-Za-z\s]/g, "");
 			if(lastName == "") setLastName(rest);
-			if(cusPassword == "") setCusPassword(first.toLowerCase() + "Sph3r3");
+			if(cusPassword == "") setCusPassword(DEFAULT_CUSTOMER_PASSWORD);
 		}
 	}, [name]);
 
