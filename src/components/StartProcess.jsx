@@ -2,6 +2,7 @@ import { Button, TextField, IconButton } from "@mui/material";
 import { useEffect, useState, useRef } from "react";
 import toast from "react-hot-toast";
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
+import RefreshIcon from '@mui/icons-material/Refresh';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "/api";
 
@@ -194,7 +195,7 @@ export function StartProcess({ onClose, customerId }) {
 		onClose();
 	}
 
-	function Draggy({ state, setState, label }) {
+	function Draggy({ state, setState, label, onRegenerate }) {
 		return (
 
 			<div style={{ display: "flex", alignItems: "center" }}>
@@ -205,6 +206,11 @@ export function StartProcess({ onClose, customerId }) {
 					style={{ cursor: "grab", userSelect: "none", padding: "4px" }}
 					onChange={(e) => setState(e.target.value)} />
 				<CopyableParagraph text={state} />
+				{onRegenerate && (
+					<IconButton onClick={onRegenerate} aria-label="regenerate" size="small">
+						<RefreshIcon fontSize="inherit" />
+					</IconButton>
+				)}
 			</div>
 
 		);
@@ -247,6 +253,13 @@ export function StartProcess({ onClose, customerId }) {
 		if (date) setDate(date);
 	}
 
+	function regenerateUsername() {
+		const nextUsername = generateCustomerUsername();
+		setCusUsername(nextUsername);
+		navigator.clipboard.writeText(nextUsername);
+		toast.success("Username regenerated and copied!");
+	}
+
 	return (
 		<>
 			<div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
@@ -266,7 +279,7 @@ export function StartProcess({ onClose, customerId }) {
 
 
 				<h1> 2 </h1>
-				<Draggy state={cusUsername} setState={setCusUsername} label={"username"} />
+				<Draggy state={cusUsername} setState={setCusUsername} label={"username"} onRegenerate={regenerateUsername} />
 				<Draggy state={cusPassword} setState={setCusPassword} label={"password"} />
 
 				<h1> 3 </h1>
