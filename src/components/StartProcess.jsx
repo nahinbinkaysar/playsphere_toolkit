@@ -119,7 +119,7 @@ export function StartProcess({ onClose, customerId }) {
 	}, [name]);
 
 	useEffect(() => {
-		setDone(`done\nid: ${cusUsername}\npass: ${cusPassword}`);
+		setDone(`purchase done\nid: ${cusUsername}\npass: ${cusPassword}`);
 	}, [cusUsername, cusPassword]);
 
 	useEffect(() => {
