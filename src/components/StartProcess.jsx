@@ -114,7 +114,7 @@ export function StartProcess({ onClose, customerId }) {
 			if(firstName == "") setFirstName(first);
 			const rest = parts.slice(1).join(" ").replace(/[^A-Za-z\s]/g, "");
 			if(lastName == "") setLastName(rest);
-			if(cusPassword == "") setCusPassword(DEFAULT_CUSTOMER_PASSWORD);
+			if(cusPassword == "") setCusPassword(DEFAULT_CUSTOMER_PASSWORD+getRandomItem(USERNAME_NOUNS));
 		}
 	}, [name]);
 
